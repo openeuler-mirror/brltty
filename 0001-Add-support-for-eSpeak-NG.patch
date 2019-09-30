@@ -1,0 +1,549 @@
+From 6df30ecf05440a1a0f197817d3e39c15d04f15c0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ond=C5=99ej=20Lyson=C4=9Bk?= <olysonek@redhat.com>
+Date: Wed, 28 Feb 2018 22:49:07 +0100
+Subject: [PATCH] Add support for eSpeak-NG
+
+It is mostly a copy of the eSpeak driver.
+
+Squashed with Dave Mielke's commit:
+Some modifications to the introduction of the eSpeak-NG speech driver: (dm)
+
+Fix the order of lists that are alphabetically sorted by driver code.
+Undo the changes to the derived Portuguese documents.
+---
+ Documents/CONTRIBUTORS                             |   1 +
+ Documents/Manual-BRLTTY/English/driver-codes.sgml  |   1 +
+ .../Manual-BRLTTY/English/speech-drivers.sgml      |   2 +
+ Documents/Manual-BRLTTY/French/driver-codes.sgml   |   1 +
+ Documents/Manual-BRLTTY/French/speech-drivers.sgml |   2 +
+ Documents/README.DOS                               |   5 +-
+ Documents/brltty.1.in                              |   3 +
+ Documents/brltty.conf.in                           |   7 +
+ Documents/speech-driver.csv                        |   1 +
+ Drivers/Speech/eSpeak-NG/Makefile.in               |  29 ++++
+ Drivers/Speech/eSpeak-NG/README                    |  34 ++++
+ Drivers/Speech/eSpeak-NG/speech.c                  | 174 +++++++++++++++++++++
+ README                                             |   1 +
+ brltty.spec.in                                     |  25 +++
+ cfg-android                                        |   1 +
+ cfg-darwin                                         |   1 +
+ cfg-dos                                            |   1 +
+ config.mk.in                                       |   1 +
+ configure.ac                                       |   4 +
+ 19 files changed, 292 insertions(+), 2 deletions(-)
+ create mode 100644 Drivers/Speech/eSpeak-NG/Makefile.in
+ create mode 100644 Drivers/Speech/eSpeak-NG/README
+ create mode 100644 Drivers/Speech/eSpeak-NG/speech.c
+
+diff --git a/Documents/CONTRIBUTORS b/Documents/CONTRIBUTORS
+index 5a3af85b8..282ea193a 100644
+--- a/Documents/CONTRIBUTORS
++++ b/Documents/CONTRIBUTORS
+@@ -50,6 +50,7 @@ Nikita Tseykovets <tseikovets@rambler.ru>
+ Ole Guldberg <ole@omgwtf.dk>
+ Olivier Bert <obert01@mistigri.org>
+ Ollie Mallard <mallard@ilgerone.net>
++olysonek
+ Oscar Fernandez <ofa@once.es>
+ Pete De Vasto <pdevasto@incyte.com>
+ Peter Lundblad <plundblad@google.com>
+diff --git a/Documents/Manual-BRLTTY/English/driver-codes.sgml b/Documents/Manual-BRLTTY/English/driver-codes.sgml
+index 09eae4039..870cde7e3 100644
+--- a/Documents/Manual-BRLTTY/English/driver-codes.sgml
++++ b/Documents/Manual-BRLTTY/English/driver-codes.sgml
+@@ -10,6 +10,7 @@ bm|Baum (Native, HT, PB1, PB2)@
+ bn|BrailleNote@
+ cb|CombiBraille@
+ ec|EcoBraille@
++en|eSpeak-NG@
+ es|eSpeak@
+ eu|EuroBraille@
+ fl|FestivalLite@
+diff --git a/Documents/Manual-BRLTTY/English/speech-drivers.sgml b/Documents/Manual-BRLTTY/English/speech-drivers.sgml
+index 49caa060f..66c66e850 100644
+--- a/Documents/Manual-BRLTTY/English/speech-drivers.sgml
++++ b/Documents/Manual-BRLTTY/English/speech-drivers.sgml
+@@ -8,6 +8,8 @@ CombiBraille
+   |@
+ eSpeak
+   |text to speech engine@
++eSpeak-NG
++  |text to speech engine@
+ ExternalSpeech
+   |runs /usr/local/bin/externalspeech@
+ Festival
+diff --git a/Documents/Manual-BRLTTY/French/driver-codes.sgml b/Documents/Manual-BRLTTY/French/driver-codes.sgml
+index 09eae4039..870cde7e3 100644
+--- a/Documents/Manual-BRLTTY/French/driver-codes.sgml
++++ b/Documents/Manual-BRLTTY/French/driver-codes.sgml
+@@ -10,6 +10,7 @@ bm|Baum (Native, HT, PB1, PB2)@
+ bn|BrailleNote@
+ cb|CombiBraille@
+ ec|EcoBraille@
++en|eSpeak-NG@
+ es|eSpeak@
+ eu|EuroBraille@
+ fl|FestivalLite@
+diff --git a/Documents/Manual-BRLTTY/French/speech-drivers.sgml b/Documents/Manual-BRLTTY/French/speech-drivers.sgml
+index 9d079b6c6..ede82d398 100644
+--- a/Documents/Manual-BRLTTY/French/speech-drivers.sgml
++++ b/Documents/Manual-BRLTTY/French/speech-drivers.sgml
+@@ -6,6 +6,8 @@ CombiBraille
+   |@
+ eSpeak
+   |text to speech engine@
++eSpeak-NG
++  |text to speech engine@
+ ExternalSpeech
+   |runs /usr/local/bin/externalspeech@
+ Festival
+diff --git a/Documents/README.DOS b/Documents/README.DOS
+index eca9540ec..5b5de15c4 100644
+--- a/Documents/README.DOS
++++ b/Documents/README.DOS
+@@ -285,8 +285,9 @@ You should be able to use a configure command like this one::
+       --disable-api --disable-icu --disable-x \
+       --without-usb-package --without-bluetooth-package \
+       --without-libbraille --with-braille-driver=-vr,all \
+-      --without-espeak --without-flite \
+-      --without-speechd --with-speech-driver=all \
++      --without-espeak --without-espeak-ng \
++      --without-flite --without-speechd \
++      --with-speech-driver=all \
+       --with-screen-driver=pb,-all
+ 
+ The ``cfg-dos`` Script
+diff --git a/Documents/brltty.1.in b/Documents/brltty.1.in
+index ab7b3c1db..b95aaa964 100644
+--- a/Documents/brltty.1.in
++++ b/Documents/brltty.1.in
+@@ -714,6 +714,9 @@ CombiBraille
+ .B ec
+ EcoBraille
+ .TP 4
++.B en
++eSpeak-NG
++.TP 4
+ .B es
+ eSpeak
+ .TP 4
+diff --git a/Documents/brltty.conf.in b/Documents/brltty.conf.in
+index e11273674..80967177a 100644
+--- a/Documents/brltty.conf.in
++++ b/Documents/brltty.conf.in
+@@ -343,6 +343,7 @@
+ #speech-driver	an	# Android (text to speech engine)
+ #speech-driver	bl	# BrailleLite
+ #speech-driver	cb	# CombiBraille
++#speech-driver	en	# eSpeak-NG (text to speech engine)
+ #speech-driver	es	# eSpeak (text to speech engine)
+ #speech-driver	fl	# FestivalLite (text to speech engine)
+ #speech-driver	fv	# Festival (text to speech engine)
+@@ -383,6 +384,12 @@
+ #speech-parameters es:PunctList=
+ #speech-parameters es:Voice=default
+ 
++# eSpeak-NG Speech Driver Parameters
++#speech-parameters en:MaxRate=450 # [80-]
++#speech-parameters en:Path=
++#speech-parameters en:PunctList=
++#speech-parameters en:Voice=en
++
+ # ExternalSpeech Speech Driver Parameters
+ #speech-parameters xs:Program=/usr/local/bin/externalspeech
+ #speech-parameters xs:Uid=65534
+diff --git a/Documents/speech-driver.csv b/Documents/speech-driver.csv
+index 2e339a6bf..b56e85cbf 100644
+--- a/Documents/speech-driver.csv
++++ b/Documents/speech-driver.csv
+@@ -4,6 +4,7 @@
+ "bl","BrailleLite"
+ "cb","CombiBraille"
+ "es","eSpeak (text to speech engine)"
++"en","eSpeak-NG (text to speech engine)"
+ "fl","FestivalLite (text to speech engine)"
+ "fv","Festival (text to speech engine)"
+ "gs","GenericSay (pipes to /usr/local/bin/say)"
+diff --git a/Drivers/Speech/eSpeak-NG/Makefile.in b/Drivers/Speech/eSpeak-NG/Makefile.in
+new file mode 100644
+index 000000000..d91f9c59d
+--- /dev/null
++++ b/Drivers/Speech/eSpeak-NG/Makefile.in
+@@ -0,0 +1,29 @@
++###############################################################################
++# BRLTTY - A background process providing access to the console screen (when in
++#          text mode) for a blind person using a refreshable braille display.
++#
++# Copyright (C) 1995-2018 by The BRLTTY Developers.
++#
++# BRLTTY comes with ABSOLUTELY NO WARRANTY.
++#
++# This is free software, placed under the terms of the
++# GNU Lesser General Public License, as published by the Free Software
++# Foundation; either version 2.1 of the License, or (at your option) any
++# later version. Please see the file LICENSE-LGPL for details.
++#
++# Web Page: http://brltty.com/
++#
++# This software is maintained by Dave Mielke <dave@mielke.cc>.
++###############################################################################
++
++DRIVER_CODE = en
++DRIVER_NAME = eSpeak-NG
++DRIVER_COMMENT = text to speech engine
++DRIVER_VERSION = 0.1
++DRIVER_DEVELOPERS = Nicolas Pitre <nico@fluxnic.net>, Ondřej Lysoněk <olysonek@redhat.com>
++SPK_OBJS = @speech_libraries_en@
++include $(SRC_TOP)speech.mk
++
++speech.$O:
++	$(CC) $(SPK_CFLAGS) -I$(ESPEAK_NG_ROOT)/include -c $(SRC_DIR)/speech.c
++
+diff --git a/Drivers/Speech/eSpeak-NG/README b/Drivers/Speech/eSpeak-NG/README
+new file mode 100644
+index 000000000..825848aa0
+--- /dev/null
++++ b/Drivers/Speech/eSpeak-NG/README
+@@ -0,0 +1,34 @@
++This directory contains the BRLTTY speech driver for the eSpeak-NG text to
++speech engine.  The eSpeak-NG web site is
++https://github.com/espeak-ng/espeak-ng/.
++
++eSpeak-NG comes with a simple command-line tool called espeak-ng which can be
++used to test it, and to recompile modified dictionaries, etc. Please see
++the espeak-ng man page for more information.
++
++BRLTTY's configure script automatically includes this driver if the
++eSpeak-NG development library is installed.
++
++This driver recognizes the following parameters:
++
++path
++
++	Specifies the directory containing the espeak-ng-data directory.
++	If not specified, the default location is used.
++	
++punctlist
++
++	Specified a list of punctuation characters whose names are to be
++	spoken when the speech punctuation parameter is set to "Some".
++	If not specified, a default list is used.
++
++voice
++
++	Specifies a voice/language to use.  The complete list of available
++	voices may be obtained with the command 'espeak-ng --voices'.
++
++maxrate
++
++	Overrides the maximum speech rate value. The default is 450.
++	This cannot be lower than 80.
++
+diff --git a/Drivers/Speech/eSpeak-NG/speech.c b/Drivers/Speech/eSpeak-NG/speech.c
+new file mode 100644
+index 000000000..af918c971
+--- /dev/null
++++ b/Drivers/Speech/eSpeak-NG/speech.c
+@@ -0,0 +1,174 @@
++/*
++ * BRLTTY - A background process providing access to the console screen (when in
++ *          text mode) for a blind person using a refreshable braille display.
++ *
++ * Copyright (C) 1995-2018 by The BRLTTY Developers.
++ *
++ * BRLTTY comes with ABSOLUTELY NO WARRANTY.
++ *
++ * This is free software, placed under the terms of the
++ * GNU Lesser General Public License, as published by the Free Software
++ * Foundation; either version 2.1 of the License, or (at your option) any
++ * later version. Please see the file LICENSE-LGPL for details.
++ *
++ * Web Page: http://brltty.com/
++ *
++ * This software is maintained by Dave Mielke <dave@mielke.cc>.
++ */
++
++#include "prologue.h"
++
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++
++#include "log.h"
++#include "parse.h"
++
++typedef enum {
++	PARM_PATH,
++	PARM_PUNCTLIST,
++	PARM_VOICE,
++	PARM_MAXRATE
++} DriverParameter;
++#define SPKPARMS "path", "punctlist", "voice", "maxrate"
++
++#include "spk_driver.h"
++
++#include <espeak-ng/speak_lib.h>
++
++static int maxrate = espeakRATE_MAXIMUM;
++
++static void
++spk_say(volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes)
++{
++	int result;
++
++	/* add 1 to the length in order to pass along the trailing zero */
++	result = espeak_Synth(buffer, length+1, 0, POS_CHARACTER, 0,
++			espeakCHARS_UTF8, NULL, (void *)spk);
++	if (result != EE_OK)
++		logMessage(LOG_ERR, "eSpeak-NG: Synth() returned error %d", result);
++}
++
++static void
++spk_mute(volatile SpeechSynthesizer *spk)
++{
++	espeak_Cancel();
++}
++
++static int SynthCallback(short *audio, int numsamples, espeak_EVENT *events)
++{
++	volatile SpeechSynthesizer *spk = events->user_data;
++
++	while (events->type != espeakEVENT_LIST_TERMINATED) {
++		if (events->type == espeakEVENT_WORD)
++			tellSpeechLocation(spk, events->text_position - 1);
++		if (events->type == espeakEVENT_MSG_TERMINATED)
++			tellSpeechFinished(spk);
++		events++;
++	}
++	return 0;
++}
++
++static void
++spk_drain(volatile SpeechSynthesizer *spk)
++{
++	espeak_Synchronize();
++}
++
++static void
++spk_setVolume(volatile SpeechSynthesizer *spk, unsigned char setting)
++{
++	int volume = getIntegerSpeechVolume(setting, 50);
++	espeak_SetParameter(espeakVOLUME, volume, 0);
++}
++
++static void
++spk_setRate(volatile SpeechSynthesizer *spk, unsigned char setting)
++{
++	int h_range = (maxrate - espeakRATE_MINIMUM)/2;
++	int rate = getIntegerSpeechRate(setting, h_range) + espeakRATE_MINIMUM;
++	espeak_SetParameter(espeakRATE, rate, 0);
++}
++
++static void
++spk_setPitch(volatile SpeechSynthesizer *spk, unsigned char setting)
++{
++	int pitch = getIntegerSpeechPitch(setting, 50);
++	espeak_SetParameter(espeakPITCH, pitch, 0);
++}
++
++static void
++spk_setPunctuation(volatile SpeechSynthesizer *spk, SpeechPunctuation setting)
++{
++	espeak_PUNCT_TYPE punct;
++	if (setting <= SPK_PUNCTUATION_NONE)
++		punct = espeakPUNCT_NONE;
++	else if (setting >= SPK_PUNCTUATION_ALL)
++		punct = espeakPUNCT_ALL;
++	else
++		punct = espeakPUNCT_SOME;
++	espeak_SetParameter(espeakPUNCTUATION, punct, 0);
++}
++
++static int spk_construct(volatile SpeechSynthesizer *spk, char **parameters)
++{
++	char *data_path, *voicename, *punctlist;
++	int result;
++
++	spk->setVolume = spk_setVolume;
++	spk->setRate = spk_setRate;
++	spk->setPitch = spk_setPitch;
++	spk->setPunctuation = spk_setPunctuation;
++	spk->drain = spk_drain;
++
++	logMessage(LOG_INFO, "eSpeak-NG version %s", espeak_Info(NULL));
++
++	data_path = parameters[PARM_PATH];
++	if (data_path && !*data_path)
++		data_path = NULL;
++	result = espeak_Initialize(AUDIO_OUTPUT_PLAYBACK, 0, data_path, 0);
++	if (result < 0) {
++		logMessage(LOG_ERR, "eSpeak-NG: initialization failed");
++		return 0;
++	}
++
++	voicename = parameters[PARM_VOICE];
++	if(!voicename || !*voicename)
++		voicename = "en";
++	result = espeak_SetVoiceByName(voicename);
++	if (result != EE_OK) {
++		espeak_VOICE voice_select;
++		memset(&voice_select, 0, sizeof(voice_select));
++		voice_select.languages = voicename;
++		result = espeak_SetVoiceByProperties(&voice_select);
++	}
++	if (result != EE_OK) {
++		logMessage(LOG_ERR, "eSpeak-NG: unable to load voice '%s'", voicename);
++		return 0;
++	}
++
++	punctlist = parameters[PARM_PUNCTLIST];
++	if (punctlist && *punctlist) {
++		wchar_t w_punctlist[strlen(punctlist) + 1];
++		int i = 0;
++		while ((w_punctlist[i] = punctlist[i]) != 0) i++;
++		espeak_SetPunctuationList(w_punctlist);
++	}
++
++	if (parameters[PARM_MAXRATE]) {
++		int val = atoi(parameters[PARM_MAXRATE]);
++		if (val > espeakRATE_MINIMUM) maxrate = val;
++	}
++
++	espeak_SetSynthCallback(SynthCallback);
++
++	return 1;
++}
++
++static void spk_destruct(volatile SpeechSynthesizer *spk)
++{
++	espeak_Cancel();
++	espeak_Terminate();
++}
+diff --git a/README b/README
+index 5fcd8c221..9fd946eb5 100644
+--- a/README
++++ b/README
+@@ -210,6 +210,7 @@ The following speech synthesizers are supported:
+ -  BrailleLite
+ -  CombiBraille
+ -  eSpeak [text to speech engine]
++-  eSpeak-NG [text to speech engine]
+ -  ExternalSpeech [runs /usr/local/bin/externalspeech]
+ -  Festival [text to speech engine]
+ -  FestivalLite [text to speech engine]
+diff --git a/brltty.spec.in b/brltty.spec.in
+index 8a4986c5d..f5aa33dc2 100644
+--- a/brltty.spec.in
++++ b/brltty.spec.in
+@@ -144,6 +144,27 @@ Install this package if you would like to be able to use the
+ eSpeak text-to-speech engine.
+ 
+ 
++%package -n brltty-speech-espeak-ng
++Version: @PACKAGE_VERSION@
++Release: 1
++Group: System Environment/Daemons
++License: GPL
++
++Requires: espeak-ng
++
++BuildRequires: espeak-ng-devel
++
++AutoProv: no
++AutoReq: yes
++
++Summary: eSpeak-NG speech driver for BRLTTY.
++%description -n brltty-speech-espeak-ng
++This package provides the eSpeak-NG speech driver for BRLTTY.
++
++Install this package if you would like to be able to use the
++eSpeak-NG text-to-speech engine.
++
++
+ %package -n brltty-speech-festival
+ Version: @PACKAGE_VERSION@
+ Release: 1
+@@ -512,6 +533,7 @@ rm -fr "${RPM_BUILD_ROOT}"
+ %{_libdir}/brltty
+ %exclude %{_libdir}/brltty/libbrlttybba.so
+ %exclude %{_libdir}/brltty/libbrlttybxw.so
++%exclude %{_libdir}/brltty/libbrlttysen.so
+ %exclude %{_libdir}/brltty/libbrlttyses.so
+ %exclude %{_libdir}/brltty/libbrlttysfl.so
+ %exclude %{_libdir}/brltty/libbrlttysfv.so
+@@ -541,6 +563,9 @@ rm -fr "${RPM_BUILD_ROOT}"
+ %files -n brltty-speech-espeak
+ %{_libdir}/brltty/libbrlttyses.so
+ 
++%files -n brltty-speech-espeak-ng
++%{_libdir}/brltty/libbrlttysen.so
++
+ %files -n brltty-speech-festival
+ %{_libdir}/brltty/libbrlttysfv.so
+ 
+diff --git a/cfg-android b/cfg-android
+index 1c9ad3e14..db83a28a6 100755
+--- a/cfg-android
++++ b/cfg-android
+@@ -89,6 +89,7 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
+    --with-braille-driver=-ba,-bg,-tt,-vr,al,at,bm,bn,ce,eu,fs,hm,ht,hw,ic,ir,md,mm,mt,np,pg,pm,sk,vo \
+    \
+    --without-espeak \
++   --without-espeak-ng \
+    --without-flite \
+    --without-mikropuhe \
+    --without-speechd \
+diff --git a/cfg-darwin b/cfg-darwin
+index 13741c371..992292717 100755
+--- a/cfg-darwin
++++ b/cfg-darwin
+@@ -25,6 +25,7 @@
+    --without-libbraille \
+    \
+    --without-espeak \
++   --without-espeak-ng \
+    --without-flite \
+    --without-mikropuhe \
+    --without-speechd \
+diff --git a/cfg-dos b/cfg-dos
+index 82277980b..55427b7b2 100755
+--- a/cfg-dos
++++ b/cfg-dos
+@@ -57,6 +57,7 @@ export LDFLAGS=""
+    --with-braille-driver=-vr,all \
+    \
+    --without-espeak \
++   --without-espeak-ng \
+    --without-flite \
+    --without-mikropuhe \
+    --without-speechd \
+diff --git a/config.mk.in b/config.mk.in
+index ead6ca348..89af949de 100644
+--- a/config.mk.in
++++ b/config.mk.in
+@@ -370,6 +370,7 @@ SCREEN_DRIVER_LIBRARIES = @screen_driver_libraries@
+ SCREEN_DRIVERS = @screen_drivers@
+ 
+ ESPEAK_ROOT = @espeak_root@
++ESPEAK_NG_ROOT = @espeak_ng_root@
+ FLITE_ROOT = @flite_root@
+ FLITE_LANGUAGE = @flite_language@
+ FLITE_LEXICON = @flite_lexicon@
+diff --git a/configure.ac b/configure.ac
+index 39eb98390..b86f85209 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1742,6 +1742,10 @@ BRLTTY_ARG_DISABLE(
+    BRLTTY_SPEECH_DRIVER([bl], [BrailleLite])
+    BRLTTY_SPEECH_DRIVER([cb], [CombiBraille])
+ 
++   BRLTTY_IF_PACKAGE([eSpeak-NG], [espeak_ng], [include/espeak-ng/speak_lib.h], [dnl
++      BRLTTY_SPEECH_DRIVER([en], [eSpeak-NG], [-L$(ESPEAK_NG_ROOT)/lib -lespeak-ng])
++   ])
++
+    BRLTTY_IF_PACKAGE([eSpeak], [espeak], [include/espeak/speak_lib.h], [dnl
+       BRLTTY_SPEECH_DRIVER([es], [eSpeak], [-L$(ESPEAK_ROOT)/lib -lespeak])
+    ])
+-- 
+2.14.3
+
