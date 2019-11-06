@@ -3,10 +3,12 @@
 %{!?tcl_version: %global tcl_version %(echo 'puts $tcl_version' | tclsh)}
 %{!?tcl_sitearch: %global tcl_sitearch %{_prefix}/%{_lib}/tcl%{tcl_version}}
 
+%bcond_with espeak
+%bcond_with speech
 
 Name:      brltty
 Version:   5.6
-Release:   29
+Release:   30
 Summary:   Braille display driver for Linux/Unix
 License:   LGPLv2+
 URL:       http://brltty.app/
@@ -16,15 +18,30 @@ Source1:   brltty.service
 
 #patch0~2 from fedora
 Patch0:    brltty-loadLibrary.patch
+
+%if %{with speech}
 Patch1:    brltty-5.0-libspeechd.patch
+%endif
+
+%if %{with espeak}
 Patch2:    0001-Add-support-for-eSpeak-NG.patch
+%endif
+
 #patch3~4 from upstream
 Patch3:    brltty-5.6-libs-add-ldflags.patch
 Patch4:    brltty-5.6-libs-add-ldflags2.patch
 
 
-BuildRequires: byacc glibc-kernheaders bluez-libs-devel systemd gettext at-spi2-core-devel alsa-lib-devel
-BuildRequires: python3-devel autoconf espeak-ng-devel speech-dispatcher-devel
+BuildRequires: byacc glibc-kernheaders bluez-libs-devel systemd gettext
+BuildRequires: python3-devel autoconf at-spi2-core-devel alsa-lib-devel
+
+%if %{with espeak}
+BuildRequires: espeak-ng-devel
+%endif
+
+%if %{with speech}
+BuildRequires: speech-dispatcher-devel
+%endif
 
 
 Requires(pre): glibc-common, shadow-utils
@@ -36,8 +53,9 @@ Requires(postun): systemd
 Provides:  brlapi
 Obsoletes: brlapi
 
+%if %{without espeak}
 Obsoletes: brltty-espeak <= 5.6-5
-
+%endif
 
 %description
 BRLTTY is a background process (daemon) which provides
@@ -125,8 +143,12 @@ PYTHONS=
 ./autogen
 
 %configure --disable-relocatable-install --with-install-root="${RPM_BUILD_ROOT}" --disable-stripping --without-curses \
-           --without-espeak JAVA_JAR_DIR=%{_jnidir} JAVA_JNI_DIR=%{_libdir}/brltty JAVA_JNI=yes \
-           CYTHON=%{_bindir}/cython PYTHON=%{__python3}
+           JAVA_JAR_DIR=%{_jnidir} JAVA_JNI_DIR=%{_libdir}/brltty JAVA_JNI=yes \
+           CYTHON=%{_bindir}/cython PYTHON=%{__python3} \
+%if %{without espeak}
+          --without-espeak
+%endif
+
 %make_build
 
 
@@ -254,6 +276,12 @@ fi
 
 
 %changelog
+* Wed Oct 30 2019 caomeng <caomeng5@huawei.com> - 5.6-30
+- Type:NA
+- ID:NA
+- SUG:NA
+- DESC:add bcondwith espeak and speech
+
 * Wed Sep 18 2019 openEuler Buildteam <buildteam@openeuler.org> - 5.6-29
 - Type:bugfix
 - Id:NA
