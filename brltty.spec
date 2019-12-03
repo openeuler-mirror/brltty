@@ -95,6 +95,7 @@ This package provides the Tcl api for Brltty.
 %{?python_provide:%python_provide python3-%{name}}
 Requires:      %{name} = %{version}-%{release}
 BuildRequires: python3-Cython python3-devel
+Provides:      python3-brlapi = %{version}-%{release}
 Obsoletes:     python2-%{name} python-%{name}
 Summary: Python 3 api for Brltty
 %description -n python3-%{name}
