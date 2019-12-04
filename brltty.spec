@@ -8,7 +8,7 @@
 
 Name:      brltty
 Version:   5.6
-Release:   30
+Release:   31
 Summary:   Braille display driver for Linux/Unix
 License:   LGPLv2+
 URL:       http://brltty.app/
@@ -278,6 +278,12 @@ fi
 
 
 %changelog
+* Wed Dec 4 2019 hufeng <solar.hu@foxmail.com> - 5.6-31
+- Type:NA
+- ID:NA
+- SUG:NA
+- DESC:add python3-brlapi symbol
+
 * Wed Oct 30 2019 caomeng <caomeng5@huawei.com> - 5.6-30
 - Type:NA
 - ID:NA
