@@ -278,11 +278,11 @@ fi
 
 
 %changelog
-* Wed Dec 4 2019 hufeng <solar.hu@foxmail.com> - 5.6-31
-- Type:NA
-- ID:NA
+* Wed Dec 04 2019 openEuler Buildteam <buildteam@openeuler.org> - 5.6-31
+- Type:bugfix
+- Id:NA
 - SUG:NA
-- DESC:add python3-brlapi symbol
+- DESC: add the release
 
 * Wed Oct 30 2019 caomeng <caomeng5@huawei.com> - 5.6-30
 - Type:NA
