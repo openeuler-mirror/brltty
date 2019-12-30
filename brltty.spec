@@ -8,7 +8,7 @@
 
 Name:      brltty
 Version:   5.6
-Release:   31
+Release:   32
 Summary:   Braille display driver for Linux/Unix
 License:   LGPLv2+
 URL:       http://brltty.app/
@@ -69,7 +69,7 @@ Summary: Headers, static archive, and documentation for Brltty
 Requires: %{name} = %{version}-%{release}
 
 Provides: brlapi-devel = %{api_ver}-%{release}
-Obsoletes: brlapi-devel = %{api_ver}-%{release}
+Obsoletes: brlapi-devel < %{api_ver}-%{release}
 
 %description devel
 This package provides the header files, static archive, shared object
@@ -278,6 +278,12 @@ fi
 
 
 %changelog
+* Fri Dec 27 2019 openEuler Buildteam <buildteam@openeuler.org> - 5.6-32
+- Type:bugfix
+- Id:NA
+- SUG:NA
+- DESC:fix update problem
+
 * Wed Dec 04 2019 openEuler Buildteam <buildteam@openeuler.org> - 5.6-31
 - Type:bugfix
 - Id:NA
