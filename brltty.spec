@@ -1,14 +1,13 @@
 %define api_ver 0.6.7
 
-%{!?tcl_version: %global tcl_version %(echo 'puts $tcl_version' | tclsh)}
-%{!?tcl_sitearch: %global tcl_sitearch %{_prefix}/%{_lib}/tcl%{tcl_version}}
+%{!?tcl_sitearch: %global tcl_sitearch %{_prefix}/%{_lib}}
 
 %bcond_with espeak
 %bcond_with speech
 
 Name:      brltty
 Version:   5.6
-Release:   32
+Release:   33
 Summary:   Braille display driver for Linux/Unix
 License:   LGPLv2+
 URL:       http://brltty.app/
@@ -218,10 +217,8 @@ fi
 
 %{_libdir}/brltty/
 %{_libdir}/libbrlapi.so.*
-%exclude %{_libdir}/brltty/libbrlttyssd.so
 %exclude %{_libdir}/brltty/libbrlttybxw.so
 %exclude %{_libdir}/brltty/libbrlttyxa2.so
-%exclude %{_libdir}/brltty/libbrlttysen.so
 %exclude %{_libdir}/brltty/libbrlapi_java.so
 
 %{_sysconfdir}/brltty/
@@ -278,6 +275,12 @@ fi
 
 
 %changelog
+* Tue Jan 14 2020 openEuler Buildteam <buildteam@openeuler.org> - 5.6-33
+- Type:bugfix
+- Id:NA
+- SUG:NA
+- DESC:bugfix about files in build process
+
 * Fri Dec 27 2019 openEuler Buildteam <buildteam@openeuler.org> - 5.6-32
 - Type:bugfix
 - Id:NA
