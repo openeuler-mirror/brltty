@@ -7,7 +7,7 @@
 
 Name:      brltty
 Version:   5.6
-Release:   33
+Release:   34
 Summary:   Braille display driver for Linux/Unix
 License:   LGPLv2+
 URL:       http://brltty.app/
@@ -31,7 +31,7 @@ Patch3:    brltty-5.6-libs-add-ldflags.patch
 Patch4:    brltty-5.6-libs-add-ldflags2.patch
 
 
-BuildRequires: byacc glibc-kernheaders bluez-libs-devel systemd gettext
+BuildRequires: byacc glibc-kernheaders bluez-libs-devel systemd gettext gdb
 BuildRequires: python3-devel autoconf at-spi2-core-devel alsa-lib-devel
 
 %if %{with espeak}
@@ -275,6 +275,9 @@ fi
 
 
 %changelog
+* Tue Mar 17 2020 songnannan <songnannan2@huawei.com> - 5.6-34
+- add gdb in buildrequires
+
 * Tue Jan 14 2020 openEuler Buildteam <buildteam@openeuler.org> - 5.6-33
 - Type:bugfix
 - Id:NA
