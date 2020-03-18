@@ -1,13 +1,13 @@
 %define api_ver 0.6.7
-
-%{!?tcl_sitearch: %global tcl_sitearch %{_prefix}/%{_lib}}
+%define tcl_version tcl8.6
+%{!?tcl_sitearch: %global tcl_sitearch %{_prefix}/%{_lib}/%{tcl_version}}
 
 %bcond_with espeak
 %bcond_with speech
 
 Name:      brltty
 Version:   5.6
-Release:   34
+Release:   35
 Summary:   Braille display driver for Linux/Unix
 License:   LGPLv2+
 URL:       http://brltty.app/
@@ -275,6 +275,9 @@ fi
 
 
 %changelog
+* Wed Mar 18 2020 songnannan <songnannan2@huawei.com> - 5.6-35
+- change the path for tcl
+
 * Tue Mar 17 2020 songnannan <songnannan2@huawei.com> - 5.6-34
 - add gdb in buildrequires
 
