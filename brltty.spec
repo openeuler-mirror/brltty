@@ -1,4 +1,4 @@
-%define api_ver 0.6.7
+%define api_ver 0.8.0
 %define tcl_version tcl8.6
 %{!?tcl_sitearch: %global tcl_sitearch %{_prefix}/%{_lib}/%{tcl_version}}
 
@@ -6,8 +6,8 @@
 %bcond_with speech
 
 Name:      brltty
-Version:   5.6
-Release:   35
+Version:   6.1
+Release:   1
 Summary:   Braille display driver for Linux/Unix
 License:   LGPLv2+
 URL:       http://brltty.app/
@@ -16,22 +16,13 @@ Source0:   http://brltty.app/archive/%{name}-%{version}.tar.xz
 Source1:   brltty.service
 
 #patch0~2 from fedora
-Patch0:    brltty-loadLibrary.patch
+Patch0:    brltty-6.1-loadLibrary.patch
 
 %if %{with speech}
 Patch1:    brltty-5.0-libspeechd.patch
 %endif
 
-%if %{with espeak}
-Patch2:    0001-Add-support-for-eSpeak-NG.patch
-%endif
-
-#patch3~4 from upstream
-Patch3:    brltty-5.6-libs-add-ldflags.patch
-Patch4:    brltty-5.6-libs-add-ldflags2.patch
-
-
-BuildRequires: byacc glibc-kernheaders bluez-libs-devel systemd gettext gdb
+BuildRequires: brltty tcl-brltty byacc glibc-kernheaders bluez-libs-devel systemd gettext gdb
 BuildRequires: python3-devel autoconf at-spi2-core-devel alsa-lib-devel
 
 %if %{with espeak}
@@ -150,7 +141,7 @@ PYTHONS=
           --without-espeak
 %endif
 
-%make_build
+make VERBOSE=1
 
 
 find . \( -path ./doc -o -path ./Documents \) -prune -o \
@@ -172,7 +163,9 @@ rm -rf $RPM_BUILD_ROOT/%{_libdir}/libbrlapi.a
 
 %find_lang %{name}
 cp -p %{name}.lang ../
-
+cp -a %{_libdir}/libbrlapi.so.* %{buildroot}%{_libdir}
+cp -a %{_libdir}/tcl8.6/brlapi-* %{buildroot}%{_libdir}/tcl8.6
+ 
 /usr/bin/2to3 -wn ${RPM_BUILD_ROOT}/etc/brltty/Contraction/latex-access.ctb
 sed -i 's|/usr/bin/python|/usr/bin/python3|g' ${RPM_BUILD_ROOT}/etc/brltty/Contraction/latex-access.ctb
 
@@ -222,7 +215,7 @@ fi
 %exclude %{_libdir}/brltty/libbrlapi_java.so
 
 %{_sysconfdir}/brltty/
-%{_sysconfdir}/X11/Xsession.d/60xbrlapi
+%{_sysconfdir}/X11/Xsession.d/90xbrlapi
 
 %{_datadir}/polkit-1/actions/org.a11y.brlapi.policy
 %exclude %{_datadir}/gdm/greeter/autostart/xbrlapi.desktop
@@ -251,6 +244,7 @@ fi
 
 %files -n tcl-%{name}
 %{tcl_sitearch}/brlapi-%{api_ver}
+%{tcl_sitearch}/brlapi-0.6.7
 
 %files -n python3-%{name}
 %{python3_sitearch}/brlapi.cpython-*.so
@@ -275,6 +269,12 @@ fi
 
 
 %changelog
+* Thu Jul 23 2020 gaihuiying <gaihuiying1@huawei.com> - 6.1-1
+- Type:requirement
+- Id:NA
+- SUG:NA
+- DESC:update brltty version to 6.1
+
 * Wed Mar 18 2020 songnannan <songnannan2@huawei.com> - 5.6-35
 - change the path for tcl
 
