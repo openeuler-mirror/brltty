@@ -7,7 +7,7 @@
 
 Name:      brltty
 Version:   5.6
-Release:   35
+Release:   36
 Summary:   Braille display driver for Linux/Unix
 License:   LGPLv2+
 URL:       http://brltty.app/
@@ -275,6 +275,9 @@ fi
 
 
 %changelog
+* Tue Aug 18 2020 chenyaqiang <chenyaqiang@huawei.com> - 5.6-36
+- rebuild for package build
+
 * Wed Mar 18 2020 songnannan <songnannan2@huawei.com> - 5.6-35
 - change the path for tcl
 
