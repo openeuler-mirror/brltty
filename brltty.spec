@@ -7,7 +7,7 @@
 
 Name:      brltty
 Version:   6.1
-Release:   1
+Release:   2
 Summary:   Braille display driver for Linux/Unix
 License:   LGPLv2+
 URL:       http://brltty.app/
@@ -15,7 +15,6 @@ Source0:   http://brltty.app/archive/%{name}-%{version}.tar.xz
 
 Source1:   brltty.service
 
-#patch0~2 from fedora
 Patch0:    brltty-6.1-loadLibrary.patch
 
 %if %{with speech}
@@ -269,6 +268,12 @@ fi
 
 
 %changelog
+* Tue Dec 15 2020 xihaochen <xihaochen@huawei.com> - 6.1-2
+- Type:requirement
+- Id:NA
+- SUG:NA
+- DESC:remove sensitive words 
+
 * Thu Jul 23 2020 gaihuiying <gaihuiying1@huawei.com> - 6.1-1
 - Type:requirement
 - Id:NA
