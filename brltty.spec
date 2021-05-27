@@ -7,7 +7,7 @@
 
 Name:      brltty
 Version:   6.1
-Release:   2
+Release:   3
 Summary:   Braille display driver for Linux/Unix
 License:   LGPLv2+
 URL:       http://brltty.app/
@@ -23,6 +23,7 @@ Patch1:    brltty-5.0-libspeechd.patch
 
 BuildRequires: brltty tcl-brltty byacc glibc-kernheaders bluez-libs-devel systemd gettext gdb
 BuildRequires: python3-devel autoconf at-spi2-core-devel alsa-lib-devel
+BuildRequires: automake
 
 %if %{with espeak}
 BuildRequires: espeak-ng-devel
@@ -268,6 +269,12 @@ fi
 
 
 %changelog
+* Thu May 27 2021 lijingyuan <lijingyuan3@huawei.com> - 6.1-3
+- Type:bugfix
+- Id:NA
+- SUG:NA
+- DESC:Add the compilation dependency of automake.
+
 * Tue Dec 15 2020 xihaochen <xihaochen@huawei.com> - 6.1-2
 - Type:requirement
 - Id:NA
