@@ -7,7 +7,7 @@
 
 Name:      brltty
 Version:   6.1
-Release:   3
+Release:   4
 Summary:   Braille display driver for Linux/Unix
 License:   LGPLv2+
 URL:       http://brltty.app/
@@ -21,7 +21,7 @@ Patch0:    brltty-6.1-loadLibrary.patch
 Patch1:    brltty-5.0-libspeechd.patch
 %endif
 
-BuildRequires: brltty tcl-brltty byacc glibc-kernheaders bluez-libs-devel systemd gettext gdb
+BuildRequires: brltty tcl-brltty byacc glibc-kernheaders bluez-libs-devel systemd gettext
 BuildRequires: python3-devel autoconf at-spi2-core-devel alsa-lib-devel
 BuildRequires: automake
 
@@ -269,6 +269,12 @@ fi
 
 
 %changelog
+* Thu Jul 22 2021 lijingyuan <lijingyuan3@huawei.com> - 6.1-4
+- Type:requirement
+- Id:NA
+- SUG:NA
+- DESC:Cancel gdb in buildrequires
+
 * Thu May 27 2021 lijingyuan <lijingyuan3@huawei.com> - 6.1-3
 - Type:bugfix
 - Id:NA
