@@ -7,7 +7,7 @@
 
 Name:      brltty
 Version:   6.1
-Release:   4
+Release:   5
 Summary:   Braille display driver for Linux/Unix
 License:   LGPLv2+
 URL:       http://brltty.app/
@@ -21,7 +21,9 @@ Patch0:    brltty-6.1-loadLibrary.patch
 Patch1:    brltty-5.0-libspeechd.patch
 %endif
 
-BuildRequires: brltty tcl-brltty byacc glibc-kernheaders bluez-libs-devel systemd gettext
+Patch2:    backport-support-3.10.patch
+
+BuildRequires: byacc glibc-kernheaders bluez-libs-devel systemd gettext
 BuildRequires: python3-devel autoconf at-spi2-core-devel alsa-lib-devel
 BuildRequires: automake
 
@@ -163,8 +165,6 @@ rm -rf $RPM_BUILD_ROOT/%{_libdir}/libbrlapi.a
 
 %find_lang %{name}
 cp -p %{name}.lang ../
-cp -a %{_libdir}/libbrlapi.so.* %{buildroot}%{_libdir}
-cp -a %{_libdir}/tcl8.6/brlapi-* %{buildroot}%{_libdir}/tcl8.6
  
 /usr/bin/2to3 -wn ${RPM_BUILD_ROOT}/etc/brltty/Contraction/latex-access.ctb
 sed -i 's|/usr/bin/python|/usr/bin/python3|g' ${RPM_BUILD_ROOT}/etc/brltty/Contraction/latex-access.ctb
@@ -244,7 +244,6 @@ fi
 
 %files -n tcl-%{name}
 %{tcl_sitearch}/brlapi-%{api_ver}
-%{tcl_sitearch}/brlapi-0.6.7
 
 %files -n python3-%{name}
 %{python3_sitearch}/brlapi.cpython-*.so
@@ -269,6 +268,13 @@ fi
 
 
 %changelog
+* Fri Apr 15 2022 gaihuiying <eaglegai@163.com> - 6.1-5
+- Type:bugfix
+- Id:NA
+- SUG:NA
+- DESC:delete useless files
+       fix to support python3.10
+
 * Thu Jul 22 2021 lijingyuan <lijingyuan3@huawei.com> - 6.1-4
 - Type:requirement
 - Id:NA
