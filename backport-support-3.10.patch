@@ -1,0 +1,33 @@
+From 09b9701a17618939fa0746ff532449f933213a68 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Miro=20Hron=C4=8Dok?= <miro@hroncok.cz>
+Date: Thu, 15 Apr 2021 11:32:15 +0200
+Subject: [PATCH] Python modules check: Assert exit code, not empty output
+ 
+Distutils is deprecated in Python 3.10+:
+https://www.python.org/dev/peps/pep-0632/
+ 
+When importing it, there is a warning:
+ 
+    DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+ 
+The configure script falsely assumed this is an error.
+Instead, we now check for the exit code, which is more explicit.
+ 
+In the long term, we need to migrate away from distutils, this is a stopgap measure only.
+---
+ Bindings/Python/bindings.m4 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+ 
+diff --git a/Bindings/Python/bindings.m4 b/Bindings/Python/bindings.m4
+index 784418f0c..ee28525fc 100644
+--- a/Bindings/Python/bindings.m4
++++ b/Bindings/Python/bindings.m4
+@@ -40,7 +40,7 @@ else
+    for python_module in sys distutils.sysconfig
+    do
+       python_error="`"${PYTHON}" -c "import ${python_module};" 2>&1`"
+-      if test -n "${python_error}"
++      if test $? -ne 0
+       then
+          AC_MSG_WARN([Python module not found: ${python_module}: ${python_error}])
+          PYTHON_OK=false
