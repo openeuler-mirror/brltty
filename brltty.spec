@@ -7,7 +7,7 @@
 
 Name:      brltty
 Version:   6.1
-Release:   1
+Release:   2
 Summary:   Braille display driver for Linux/Unix
 License:   LGPLv2+
 URL:       http://brltty.app/
@@ -15,15 +15,15 @@ Source0:   http://brltty.app/archive/%{name}-%{version}.tar.xz
 
 Source1:   brltty.service
 
-#patch0~2 from fedora
 Patch0:    brltty-6.1-loadLibrary.patch
 
 %if %{with speech}
 Patch1:    brltty-5.0-libspeechd.patch
 %endif
 
-BuildRequires: brltty tcl-brltty byacc glibc-kernheaders bluez-libs-devel systemd gettext gdb
+BuildRequires: byacc glibc-kernheaders bluez-libs-devel systemd gettext gdb
 BuildRequires: python3-devel autoconf at-spi2-core-devel alsa-lib-devel
+BuildRequires: automake
 
 %if %{with espeak}
 BuildRequires: espeak-ng-devel
@@ -163,8 +163,6 @@ rm -rf $RPM_BUILD_ROOT/%{_libdir}/libbrlapi.a
 
 %find_lang %{name}
 cp -p %{name}.lang ../
-cp -a %{_libdir}/libbrlapi.so.* %{buildroot}%{_libdir}
-cp -a %{_libdir}/tcl8.6/brlapi-* %{buildroot}%{_libdir}/tcl8.6
  
 /usr/bin/2to3 -wn ${RPM_BUILD_ROOT}/etc/brltty/Contraction/latex-access.ctb
 sed -i 's|/usr/bin/python|/usr/bin/python3|g' ${RPM_BUILD_ROOT}/etc/brltty/Contraction/latex-access.ctb
@@ -244,7 +242,6 @@ fi
 
 %files -n tcl-%{name}
 %{tcl_sitearch}/brlapi-%{api_ver}
-%{tcl_sitearch}/brlapi-0.6.7
 
 %files -n python3-%{name}
 %{python3_sitearch}/brlapi.cpython-*.so
@@ -269,6 +266,9 @@ fi
 
 
 %changelog
+* Fri Sep 02 2022 xu_ping <xuping33@h-partners.com> - 6.1-2
+- remove useless files and add buildrequires automake
+
 * Thu Jul 23 2020 gaihuiying <gaihuiying1@huawei.com> - 6.1-1
 - Type:requirement
 - Id:NA
